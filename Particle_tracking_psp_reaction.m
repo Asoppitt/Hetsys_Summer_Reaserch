@@ -6,7 +6,7 @@ n=7; %a convinent method of increascing resolution while maintaining
 
 np = n.*n.*10.*1000; % number of particles
 dt = 0.01;  % time step
-nt = 1;  % number of time steps
+nt = 100;  % number of time steps
 length_domain = 2.5; %length of periodic element
 height_domain = 0.25;
 
@@ -41,8 +41,6 @@ coeffs(:,1)=random(bc_rate_prior,n_tests,1);
 coeffs(:,2)=random(bc_equib_prior,n_tests,1);
 coeffs(:,3)=random(omega_mean_prior,n_tests,1);
 coeffs(:,4)=random(turb_e_init_prior,n_tests,1);
-
-load('coeffs')
 
 for index_output=1:n_tests
     bc_rate=coeffs(index_output,1);
@@ -174,7 +172,6 @@ for index_output=1:n_tests
     uxp = zeros(np,1);
     uyp = zeros(np,1);
 
-%     cmap=colormap(cool);%used for plotting
     dphi_for_plot = zeros(2,nt);
     phi_c = zeros(2,np,nt);
     system_N=zeros(nt+1,1);
@@ -261,10 +258,6 @@ for index_output=1:n_tests
         xi = rand(dim_mag(1),2);
         phip(1,[mag(P(:,1)>xi(:,1))],i) = 0.0001;
         phip(2,[mag(P(:,2)>xi(:,2))],i) = 0.0001;
-        %a BC for the scalar, not needed for general case, but is for comparing
-        %to paper
-    %     phip(1,mag,i) = 0.8+0.1*randn(length(mag),1);
-    %     phip(2,mag,i) = 0.001;
 
         % Reflection at lower boudary y<0
         neg= find(yp(:,i+1)<=0); % index of particle with yp<0
@@ -283,12 +276,6 @@ for index_output=1:n_tests
         xi = rand(dim_neg(1),2);
         phip(1,[neg(P(:,1)>xi(:,1))],i) = 0.0001;
         phip(2,[neg(P(:,2)>xi(:,2))],i) = 0.0001;
-
-
-        %a BC for the scalar, not needed for general case, but is for comparing
-        %to paper
-    %     phip(2,neg,i) = 0.001*randn(length(neg),1);
-    %     phip(1,neg,i) = 0.001;
 
         %period BC at end of periodic cell
         end_indicies = find(xp(:,i+1)>=length_domain); % index of particle with xp>length
@@ -312,15 +299,10 @@ for index_output=1:n_tests
 
     %can turn off start to end periodicity if mean flow is suffiecent
         start_indicies = find(xp(:,i+1)<=0); % index of particle with xp>length
-    %     
+        
         start_x = xp(start_indicies,i+1);
         xp([start_indicies],i+1) = -start_x; %reflecting
         uxp([start_indicies]) = -uxp([start_indicies]); 
-
-        %resetting concentrations to a bc to simulate continuous release of
-        %scalar at edge of domain use comments to turn on/off
-    %     phip(1,start_indicies,i) = 0.01+0.001*randn(length(start_indicies),1);
-    %     phip(2,start_indicies,i) = 0.01;
 
         %handeling php
         %E-M solver for omega
